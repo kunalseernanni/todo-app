@@ -1,3 +1,4 @@
+const { todo } = require("./db");
 const { createTodo, updateTodo } = require("./types");
 
 const express= rwequire('express');
@@ -8,7 +9,7 @@ app.use(express.json());
 
 // body {
 //     
-app.post("/todo", function(req, res){
+app.post("/todo", async function(req, res){
     const payload= req.body
     const parsedpayload= createTodo.safeParse(payload) // parse
 
@@ -19,15 +20,29 @@ app.post("/todo", function(req, res){
 
         return;
     }
+    await todo.create({
+        title:payload.title,
+        time: payload.time,
+        status: false
+    }
+    )
 
+    res.json({
+        mssg: "Todo Created"
+    })
 
 })
 
-app.get(".todos", function(req, res){
+app.get(".todos", async function(req, res){
+
+    const todos= await todo.find({})
+    res.json({
+        todos
+    })
 
 })
 
-app.put("/done", function(req, res){
+app.put("/done", async function(req, res){
 
     const updatepayload= updateTodo.safeParse(req.body)
 
@@ -37,4 +52,14 @@ app.put("/done", function(req, res){
         })
     }
     return
+
+    await todo.update({
+        _id : req.body.id
+    }, {
+        status: true
+    })
+    res.json({
+        mssg: "Todo is updated"
+    }
+    )
 })
